@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "TurnoYa API",
-    "description": "API REST de TurnoYa (CS 2031 - Desarrollo Basado en Plataforma). Gestión de turnos y triage para postas y centros de salud.\n\n**Cómo usarla:** ejecuta las carpetas en orden. Los requests de login/registro guardan automáticamente los tokens (`adminToken`, `pacienteToken`, `medicoToken`) y los ids (`centroId`, `turnoId`, ...) en las variables de la colección. Cambia `baseUrl` por la URL del despliegue cuando esté disponible.",
+    "description": "API REST de TurnoYa (CS 2031 - Desarrollo Basado en Plataforma). Gestión de turnos y triage para postas y centros de salud.\n\n**Cómo usarla:** ejecuta las carpetas en orden. Los requests de login/registro guardan automáticamente los tokens (`adminToken`, `pacienteToken`, `medicoToken`) y los ids (`centroId`, `turnoId`, ...) en las variables de la colección. `baseUrl` apunta al despliegue en AWS. Las credenciales de las variables son solo de demostración. Para probar en local, cambia `baseUrl` a `http://localhost:8080` y `adminPassword` a `Admin12345`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -2833,7 +2833,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080"
+      "value": "http://3.226.53.255:8080"
     },
     {
       "key": "adminEmail",
@@ -2841,7 +2841,7 @@
     },
     {
       "key": "adminPassword",
-      "value": "Admin12345"
+      "value": "Admin2026Turnoya"
     },
     {
       "key": "pacienteEmail",
