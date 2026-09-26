@@ -12,7 +12,7 @@
 | Dervy Pillaca Pullo | Backend & Async Processing |
 | Adrián Jesús Ángel Veliz Quispe | DevOps, Testing & Cloud |
 
-**Deploy:** [Completar: URL pública del backend]
+**Deploy:** http://3.226.53.255:8080 (AWS EC2 + Amazon RDS)
 
 ---
 
@@ -28,8 +28,9 @@
 8. [Eventos y asincronía](#eventos-y-asincronía)
 9. [GitHub y gestión del proyecto](#github-y-gestión-del-proyecto)
 10. [Ejecución local](#ejecución-local)
-11. [Conclusión](#conclusión)
-12. [Apéndices](#apéndices)
+11. [Despliegue en AWS](#despliegue-en-aws)
+12. [Conclusión](#conclusión)
+13. [Apéndices](#apéndices)
 
 ---
 
@@ -84,6 +85,7 @@ El nivel de urgencia se calcula con el síntoma más grave (de 1 a 4). Si el pac
 | Utilidades | Lombok, Maven Wrapper |
 | Pruebas | JUnit 5, Spring Boot Test |
 | Herramientas | Git, GitHub, GitHub Actions, Postman, IntelliJ IDEA |
+| Despliegue | AWS EC2 (Amazon Linux 2023) y Amazon RDS for PostgreSQL |
 | Servicio externo | Servidor SMTP para correos (por ejemplo, Gmail) |
 
 ### Endpoints principales
@@ -252,7 +254,7 @@ Manejar los errores de forma global evita repetir `try/catch` en cada controlado
 - **Autenticación sin estado con JWT.** El login devuelve un *access token* de 2 horas y un *refresh token* de 7 días. El token incluye `userId`, `email` y `rol`. `JwtAuthenticationFilter` lo valida en cada petición y carga el usuario con un `UserDetailsService` propio.
 - **Contraseñas cifradas con BCrypt.** Además se exige una contraseña fuerte: de 8 a 64 caracteres, con mayúscula, minúscula y número.
 - **Autorización por roles.** Se usa `@PreAuthorize` en los controladores. Los servicios además verifican la propiedad del recurso: un paciente solo puede ver, cancelar o registrar triage de sus propios turnos (`ForbiddenException`).
-- **Secretos fuera del código.** La clave JWT, las credenciales de la base de datos, el correo y el administrador inicial se leen de variables de entorno.
+- **Secretos fuera del código.** Se leen de variables de entorno.
 
 ### Prevención de vulnerabilidades
 
@@ -260,7 +262,7 @@ Manejar los errores de forma global evita repetir `try/catch` en cada controlado
 - **XSS:** la API solo responde JSON, y las plantillas de correo usan `th:text`, que escapa el contenido automáticamente.
 - **CSRF:** está desactivado porque la API es *stateless* y no usa cookies de sesión; el token viaja en la cabecera `Authorization`.
 - **CORS:** solo se aceptan los orígenes configurados en `CORS_ALLOWED_ORIGINS`.
-- **Validación de entrada:** todos los DTOs usan Bean Validation, y los datos inválidos se rechazan con 400 antes de llegar a la lógica de negocio.
+- **Validación de entrada:** los DTOs usan Bean Validation y los datos inválidos se rechazan con 400.
 
 ## Eventos y asincronía
 
@@ -278,7 +280,7 @@ Los listeners usan `@TransactionalEventListener(phase = AFTER_COMMIT)`, así que
 
 - **Flujo de ramas:** cada integrante trabajó en una rama `feature/<nombre>-<tema>` y abrió un Pull Request hacia `master`. La rama `master` está protegida: no acepta *push* directo y requiere la aprobación de otro integrante.
 - **Mensajes de commit descriptivos**, en su mayoría con el formato *Conventional Commits* (`feat`, `docs`, `build`).
-- **GitHub Projects:** [Completar: enlace al tablero, cómo se crearon los issues, a quién se asignó cada uno y las fechas límite].
+- **Gestión de tareas:** el equipo dividió el trabajo en un plan por fases. Cada integrante tuvo asignado un módulo (seguridad, catálogo, turnos y triage, eventos, Postman, documentación y despliegue), que desarrolló en su propia rama y entregó mediante un Pull Request. La fecha límite común fue la entrega de la Semana 7 (25 de septiembre de 2026).
 - **GitHub Actions:** el flujo `.github/workflows/ci.yml` se ejecuta en cada *push* y en cada Pull Request hacia `master`. Instala Java 21, compila el proyecto y corre los tests; si algo falla, el PR queda marcado en rojo antes de fusionarse.
 
 ## Ejecución local
@@ -304,6 +306,15 @@ Al arrancar se crean automáticamente un administrador y cuatro especialidades b
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Administrador inicial | `admin@turnoya.com` |
 | `MAIL_USERNAME`, `MAIL_PASSWORD` | Cuenta SMTP para correos | Vacío |
 | `CORS_ALLOWED_ORIGINS` | Orígenes permitidos del frontend | `http://localhost:5173` y `http://localhost:3000` |
+
+## Despliegue en AWS
+
+La API está publicada en **http://3.226.53.255:8080** (por ejemplo, `GET /api/v1/especialidades`).
+
+- **EC2:** ejecuta el `.jar` como servicio de `systemd` (se reinicia solo) con una IP elástica fija.
+- **Amazon RDS (PostgreSQL):** sin acceso público.
+- **Security groups:** EC2 abre solo los puertos 22 y 8080; RDS acepta el puerto 5432 únicamente desde EC2.
+- **Variables de entorno:** las credenciales, la clave JWT y la contraseña del administrador están en un archivo protegido del servidor, fuera del repositorio.
 
 ## Conclusión
 
